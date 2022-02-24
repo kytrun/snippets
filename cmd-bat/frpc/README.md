@@ -1,0 +1,1 @@
+# 将 frpc.exe 复制于当前目录并修改 fprc.ini
