@@ -63,6 +63,10 @@ function startNew {
       nohup java -Xmx1g -Xms1g -XX:ParallelGCThreads=2 -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:CICompilerCount=2 -XX:MetaspaceSize=256m -XX:MaxMetaspaceSize=256m -XX:MaxDirectMemorySize=256m -XX:NativeMemoryTracking=detail -XX:+UnlockDiagnosticVMOptions -XX:+PrintNMTStatistics -jar -Dspring.profiles.active=prod -Dserver.port=$1 $JAR_NAME > /dev/null &
       # 查出使用当前端口的新进程的 pid
       pid=`ps -ef | grep java | grep $JAR_NAME | grep $1 | grep -v grep | awk '{print $2}'`
+      if [ "$pid" == "" ]; then
+        echo "Start failed."
+        exit 1
+      fi
 		echo ""
       echo "Service ${JAR_NAME} is starting！pid=${pid}"
 		echo "........................Here is the log.............................."
@@ -80,8 +84,8 @@ OLD_PORT=`netstat -anopt |grep $OLD_PID |grep LISTEN|awk '{print $4}'|rev|cut -d
 startNew $(getRandomPort $MIN_PORT $MAX_PORT)
 
 # 本机 IP
-machine_physics_net=$(ls /sys/class/net/ | grep -v "`ls /sys/devices/virtual/net/`")
-LOCAL_IP=$(ip addr | grep "$machine_physics_net" | awk '/^[0-9]+: / {}; /inet.*global/ {print gensub(/(.*)\/(.*)/, "\\1", "g", $2)}')
+MACHINE_PHYSICS_NET=$(ls /sys/class/net/ | grep -v "`ls /sys/devices/virtual/net/`")
+LOCAL_IP=$(ip addr | grep "$MACHINE_PHYSICS_NET" | awk '/^[0-9]+: / {}; /inet.*global/ {print gensub(/(.*)\/(.*)/, "\\1", "g", $2)}')
 # 通知 nacos 下线实例
 curl -X PUT "127.0.0.1:8848/nacos/v1/ns/instance?serviceName=${SERVICE_NAME}&ip=${LOCAL_IP}&port=${OLD_PORT}&enabled=false"
 
