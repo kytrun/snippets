@@ -84,8 +84,8 @@ OLD_PORT=`netstat -anopt |grep $OLD_PID |grep LISTEN|awk '{print $4}'|rev|cut -d
 startNew $(getRandomPort $MIN_PORT $MAX_PORT)
 
 # 本机 IP
-MACHINE_PHYSICS_NET=$(ls /sys/class/net/ | grep -v "`ls /sys/devices/virtual/net/`")
-LOCAL_IP=$(ip addr | grep "$MACHINE_PHYSICS_NET" | awk '/^[0-9]+: / {}; /inet.*global/ {print gensub(/(.*)\/(.*)/, "\\1", "g", $2)}')
+LOCAL_IP=$(ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}'|tr -d "addr:")
+
 # 通知 nacos 下线实例
 curl -X PUT "127.0.0.1:8848/nacos/v1/ns/instance?serviceName=${SERVICE_NAME}&ip=${LOCAL_IP}&port=${OLD_PORT}&enabled=false"
 
