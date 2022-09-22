@@ -6,4 +6,4 @@ cd /deploy/kiraku-cloud/kiraku-{{service-name}}/
 # 下载新包
 wget -O kiraku-{{service-name}}-{{version}}.jar "{{downlaod-url}}"
 # 启动命令
-setsid sh kiraku-{{service-name}}-update.sh {{version}}
+setsid bash kiraku-{{service-name}}-update.sh {{version}}

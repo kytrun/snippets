@@ -109,7 +109,7 @@ if [ $# -eq 5 ];then
             show_pool_in_ngx_upstream;
             ;;
         *)
-            $"Usage: {sh change_nginx_upstream_conf.sh add chat-frontier-web 10.10.13.194 8080 /etc/nginx/conf.d/upstream.conf|sh change_nginx_upstream_conf.sh add chat-frontier-web 10.10.13.194 8080 /etc/nginx/conf.d/upstream.conf}"
+            $"Usage: {bash change_nginx_upstream_conf.sh add chat-frontier-web 10.10.13.194 8080 /etc/nginx/conf.d/upstream.conf|bash change_nginx_upstream_conf.sh add chat-frontier-web 10.10.13.194 8080 /etc/nginx/conf.d/upstream.conf}"
             exit 3
     esac
 else

@@ -85,8 +85,8 @@ NEW_PORT=`getRandomPort $MIN_PORT $MAX_PORT`
 startNew $NEW_PORT
 
 # 修改 nginx upstream 配置文件
-sh change_nginx_upstream_conf.sh delete backend localhost $OLD_PORT /etc/nginx/conf.d/backend_upstream.conf
-sh change_nginx_upstream_conf.sh add backend localhost $NEW_PORT /etc/nginx/conf.d/backend_upstream.conf
+bash change_nginx_upstream_conf.sh delete backend localhost $OLD_PORT /etc/nginx/conf.d/backend_upstream.conf
+bash change_nginx_upstream_conf.sh add backend localhost $NEW_PORT /etc/nginx/conf.d/backend_upstream.conf
 
 nginx -t
 nginx -s reload

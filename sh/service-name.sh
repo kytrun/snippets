@@ -9,7 +9,7 @@ LOG_PATH="/deploy/log/service-name/service-name.${DATE}.0.log"
 # 如果输入格式不对，给出提示！
 tips() {
 	echo ""
-	echo "WARNING!!!......Tips, please use command: sh auto_deploy.sh [start|stop|restart|status].   For example: sh auto_deploy.sh start  "
+	echo "WARNING!!!......Tips, please use command: bash auto_deploy.sh [start|stop|restart|status].   For example: bash auto_deploy.sh start  "
 	echo ""
 	exit 1
 }
@@ -31,7 +31,7 @@ start() {
 		echo "........................Start successfully！........................."
 	else
 		echo ""
-		echo "Service ${JAR_NAME} is already running,it's pid = ${pid}. If necessary, please use command: sh auto_deploy.sh restart."
+		echo "Service ${JAR_NAME} is already running,it's pid = ${pid}. If necessary, please use command: bash auto_deploy.sh restart."
 		echo ""
 	fi
 }

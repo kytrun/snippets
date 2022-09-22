@@ -6,4 +6,4 @@ for f in *.jar; do mv -n "$f" "$(date -r"$f" +"%Y%m%d_%H%M%S").jar"; done
 # 下载新包
 wget -O micro-{{service-name}}-{{version}}.jar "{{downlaod-url}}"
 # 启动命令
-setsid sh micro-{{service-name}}-prod.sh {{option}}
+setsid bash micro-{{service-name}}-prod.sh {{option}}
