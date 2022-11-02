@@ -1,7 +1,14 @@
 #!/bin/bash
 # 定义变量
 # 要运行的jar包路径，加不加引号都行。 注意：等号两边 不能 有空格，否则会提示command找不到
-JAR_NAME="/deploy/service-name-1.0.0.jar"
+directory=`dirname $0`
+cd $directory
+
+JAR_NAME=$(ls -1 *.jar | \
+    awk -F- '{print $2 " " $0}' | \
+    sort -t. -n -r -k1,3 | \
+    awk 'NR == 1 {print $2}')
+
 DATE=$(date +%Y-%m-%d)
 # 日志路径，加不加引号都行。 注意：等号两边 不能 有空格，否则会提示command找不到
 LOG_PATH="/deploy/log/service-name/service-name.${DATE}.0.log"
