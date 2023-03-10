@@ -1,6 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
+:LOOP
 set rootDir=D:\jianguoyun\webclip
 
 cd /d %rootDir%
@@ -11,7 +12,11 @@ for /d %%a in (*) do (
     echo !count!. %%a
 )
 
-set /p choiceNum=请输入序号进入相应目录：
+set /p choiceNum=请输入序号进入相应目录（输入exit退出脚本）：
+
+if /i "%choiceNum%"=="exit" (
+    exit /b
+)
 
 set dirNum=0
 for /d %%b in (*) do (
@@ -24,7 +29,7 @@ for /d %%b in (*) do (
 
 echo 没有该序号对应的目录
 pause
-exit /b
+goto :LOOP
 
 :startSearch
 echo 进入目录：%choiceDir%
@@ -39,7 +44,7 @@ for /r %%c in (*.md) do (
 if !fileCount! equ 0 (
     echo 该目录下没有任何 .md 文件
     pause
-    exit /b
+    goto :LOOP
 )
 
 set /a randNum=%random%!fileCount!
@@ -52,4 +57,4 @@ for %%d in (%random%) do (
 
 start "" "!file[%index%]!"
 
-exit /b
+goto :LOOP
