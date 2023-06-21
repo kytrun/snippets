@@ -29,7 +29,7 @@ for url in $image_urls; do
   image_filename="${image_filename%.*}_${RANDOM}.${image_extension}"
 
   # 替换特殊字符为下划线
-  image_filename=$(echo "$image_filename" | sed 's/[":<>*?\\\/|]/_/g')
+  image_filename=$(echo "$image_filename" | sed 's/["&:<>*?\\\/|]/_/g')
 
   # 拼接本地文件路径
   local_filepath="${assets_dir}/${image_filename}"
