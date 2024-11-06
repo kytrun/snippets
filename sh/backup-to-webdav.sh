@@ -8,6 +8,10 @@ WEBDAV_PASS="webdav_password"
 # 创建临时文件存储curl输出
 TEMP_FILE=$(mktemp)
 
+# 获取今天是星期几（0-6，0代表星期天）
+WEEKDAY=$(date +%u)
+WEEKDAY_SUFFIX="_$WEEKDAY"
+
 # 创建WebDAV目录的函数
 create_webdav_directory() {
     local dir_path="$1"
@@ -61,7 +65,7 @@ process_path() {
         FILENAME=$(basename "$LOCAL_PATH")
         DIRNAME=$(dirname "$LOCAL_PATH")
         DIRNAME=$(echo "$DIRNAME" | sed 's/^\///' | sed 's/\//_/g')
-        REMOTE_DIR="$DIRNAME"
+        REMOTE_DIR="$DIRNAME$WEEKDAY_SUFFIX"
         REMOTE_PATH="$REMOTE_DIR/$FILENAME"
 
         # 创建WebDAV目录
@@ -78,7 +82,7 @@ process_path() {
             # 获取文件名
             FILENAME=$(basename "$file")
             # 创建远程目录路径
-            REMOTE_DIR="$DIRNAME"
+            REMOTE_DIR="$DIRNAME$WEEKDAY_SUFFIX"
             REMOTE_PATH="$REMOTE_DIR/$FILENAME"
 
             # 创建WebDAV目录
