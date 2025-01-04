@@ -1,10 +1,10 @@
-:: �·���� - by ChatGPT
-:: ����ű����ڴ�ָ��Ŀ¼��������Ŀ¼�������һ�� Markdown �ļ����û�����ͨ��������Ž�����Ӧ����Ŀ¼��Ȼ��ű����ڸ�Ŀ¼�������һ�� Markdown �ļ���
-:: ÿ�νű�ִ��ʱ������Ӹ�Ŀ¼��ʼ������ӡ��ǰĿ¼��������Ŀ¼�б���Ȼ����Ҫ���û�����һ�������ѡ����Ӧ����Ŀ¼��
-:: �����������������Ŷ�Ӧ����Ŀ¼����ű��������û�и���Ŷ�Ӧ��Ŀ¼������Ϣ�������ص�Ŀ¼�б���
-:: ���ѡ���Ŀ¼��û���κ� .md �ļ�����ű��������Ӧ��Ϣ�����ص�Ŀ¼�б���
-:: ���ѡ���Ŀ¼�д��� .md �ļ�����ű����ڸ�Ŀ¼�������һ�� Markdown �ļ���
-:: �û��������롰exit���˳��ű���
+:: 岚路迢迢 - by ChatGPT
+:: 这个脚本用于从指定目录的所有子目录中随机打开一个 Markdown 文件。用户可以通过输入序号进入相应的子目录，然后脚本会在该目录中随机打开一个 Markdown 文件。
+:: 每次脚本执行时，它会从根目录开始，并打印当前目录的所有子目录列表。然后，它要求用户输入一个序号以选择相应的子目录。
+:: 如果不存在与输入序号对应的子目录，则脚本会输出“没有该序号对应的目录”的消息，并返回到目录列表。
+:: 如果选择的目录中没有任何 .md 文件，则脚本会输出相应消息，返回到目录列表。
+:: 如果选择的目录中存在 .md 文件，则脚本会在该目录中随机打开一个 Markdown 文件。
+:: 用户可以输入“exit”退出脚本。
 
 @echo off
 setlocal enabledelayedexpansion
@@ -13,14 +13,14 @@ setlocal enabledelayedexpansion
 set rootDir=D:\jianguoyun\webclip
 
 cd /d %rootDir%
-echo ��ǰĿ¼����Ŀ¼���£�
+echo 当前目录的子目录如下：
 set count=0
 for /d %%a in (*) do (
     set /a count+=1
     echo !count!. %%a
 )
 
-set /p choiceNum=��������Ž�����ӦĿ¼������exit�˳��ű�����
+set /p choiceNum=请输入序号进入相应目录（输入exit退出脚本）：
 
 if /i "%choiceNum%"=="exit" (
     exit /b
@@ -35,12 +35,12 @@ for /d %%b in (*) do (
     )
 )
 
-echo û�и���Ŷ�Ӧ��Ŀ¼
+echo 没有该序号对应的目录
 pause
 goto :LOOP
 
 :startSearch
-echo ����Ŀ¼��%choiceDir%
+echo 进入目录：%choiceDir%
 cd /d "%rootDir%\%choiceDir%"
 
 set /a fileCount=0
@@ -50,7 +50,7 @@ for /r %%c in (*.md) do (
 )
 
 if !fileCount! equ 0 (
-    echo ��Ŀ¼��û���κ� .md �ļ�
+    echo 该目录下没有任何 .md 文件
     pause
     goto :LOOP
 )
