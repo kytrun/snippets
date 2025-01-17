@@ -1,6 +1,6 @@
 @echo off
 setlocal enabledelayedexpansion
-set /p port=ÇëÊäÈë¶Ë¿ÚºÅ£º
+set /p port=è¯·è¾“å…¥ç«¯å£å·ï¼š
 for /f "tokens=1-5" %%a in ('netstat -ano ^| find ":%port%"') do (
     if "%%e%" == "" (
         set pid=%%d
