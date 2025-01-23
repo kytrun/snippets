@@ -1,26 +1,23 @@
 @echo off
-SET IP=
-
-REM 列出ipconfig /all命令中所有带有IPv4的行并输出到ipv4.txt文件中
-ipconfig /all|FINDSTR "IPv4">ipv4.txt
-SETLOCAL EnableDelayedExpansion
-FOR /F "delims=" %%a IN (ipv4.txt) DO (
-    REM 将每一行的值赋值给环境变量IP
-    SET IP=%%a
-    
-    REM 将每一行第37至倒数第5个字符依次保存到ip.txt中。附带说明 >和>>区别在于>会覆盖文件，而>>会向文件末尾继续写入
-    ECHO !IP:~37,-5!>>ip.txt
-)
-ENDLOCAL
-
-REM 删除临时文件ipv4.txt
-del ipv4.txt
-
-REM 输出临时文件ip.txt的内容
-type ip.txt
-
-REM 删除临时文件ip.txt
-del ip.txt
-
-SET IP=
+setlocal
+setlocal enabledelayedexpansion
+rem throw away everything except the IPv4 address line 
+for /f "usebackq tokens=*" %%a in (`ipconfig ^| findstr IPv4`) do (
+  rem we have for example "IPv4 Address. . . . . . . . . . . : 192.168.42.78"
+  rem split on ':' and get 2nd token
+  for /f delims^=^:^ tokens^=2 %%b in ('echo %%a') do (
+    rem we have " 192.168.42.78"
+    rem split on '.' and get 4 tokens (octets)
+    for /f "tokens=1-4 delims=." %%c in ("%%b") do (
+      set _o1=%%c
+      set _o2=%%d
+      set _o3=%%e
+      set _o4=%%f
+      rem strip leading space from first octet
+      set _4octet=!_o1:~1!.!_o2!.!_o3!.!_o4!
+      echo !_4octet!
+      )
+    )
+  )
+endlocal
 pause
