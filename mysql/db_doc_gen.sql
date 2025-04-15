@@ -24,7 +24,7 @@ WITH table_indexes AS (
     GROUP BY table_name
 )
 
-SELECT column_name, DATA_TYPE, is_nullable, is_primary_key, is_auto_increment, COLUMN_COMMENT
+SELECT column_name, DATA_TYPE, is_nullable, is_primary_key, is_auto_increment, default_value, COLUMN_COMMENT
 FROM (
     SELECT
         table_name,
@@ -33,6 +33,7 @@ FROM (
         '' AS is_nullable,
         '' AS is_primary_key,
         '' AS is_auto_increment,
+        '' AS default_value,
         '' AS COLUMN_COMMENT,
         -5 AS ORDINAL_POSITION
     FROM information_schema.tables
@@ -46,6 +47,7 @@ FROM (
         '' AS is_nullable,
         '' AS is_primary_key,
         '' AS is_auto_increment,
+        '' AS default_value,
         '' AS COLUMN_COMMENT,
         -4 AS ORDINAL_POSITION
     FROM information_schema.tables
@@ -59,6 +61,7 @@ FROM (
         '' AS is_nullable,
         '' AS is_primary_key,
         '' AS is_auto_increment,
+        '' AS default_value,
         '' AS COLUMN_COMMENT,
         -3 AS ORDINAL_POSITION
     FROM information_schema.tables
@@ -72,6 +75,7 @@ FROM (
         '' AS is_nullable,
         '' AS is_primary_key,
         '' AS is_auto_increment,
+        '' AS default_value,
         '' AS COLUMN_COMMENT,
         -2 AS ORDINAL_POSITION
     FROM information_schema.tables t
@@ -86,6 +90,7 @@ FROM (
         '是否必填' AS is_nullable,
         '是否主键' AS is_primary_key,
         '是否自增' AS is_auto_increment,
+        '默认值' AS default_value,
         '描述' AS COLUMN_COMMENT,
         -1 AS ORDINAL_POSITION
     FROM information_schema.tables
@@ -103,6 +108,10 @@ FROM (
         CASE IS_NULLABLE WHEN 'NO' THEN '是' ELSE '否' END AS is_nullable,
         CASE WHEN COLUMN_KEY = 'PRI' THEN '是' ELSE '否' END AS is_primary_key,
         CASE WHEN EXTRA = 'auto_increment' THEN '是' ELSE '否' END AS is_auto_increment,
+        CASE
+            WHEN COLUMN_DEFAULT IS NULL THEN 'NULL'
+            ELSE COLUMN_DEFAULT
+        END AS default_value,
         COLUMN_COMMENT,
         ORDINAL_POSITION
     FROM information_schema.columns
