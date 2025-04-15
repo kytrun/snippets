@@ -1,6 +1,5 @@
 SET @table_schema='db_name';
 
-
 WITH table_indexes AS (
     SELECT
         table_name,
@@ -25,30 +24,70 @@ WITH table_indexes AS (
     GROUP BY table_name
 )
 
-SELECT column_name, DATA_TYPE, is_nullable, COLUMN_COMMENT
+SELECT column_name, DATA_TYPE, is_nullable, is_primary_key, is_auto_increment, COLUMN_COMMENT
 FROM (
-    SELECT table_name, '' AS column_name, '' AS DATA_TYPE, '' AS is_nullable, '' AS COLUMN_COMMENT, -5 AS ORDINAL_POSITION
+    SELECT
+        table_name,
+        '' AS column_name,
+        '' AS DATA_TYPE,
+        '' AS is_nullable,
+        '' AS is_primary_key,
+        '' AS is_auto_increment,
+        '' AS COLUMN_COMMENT,
+        -5 AS ORDINAL_POSITION
     FROM information_schema.tables
     WHERE table_schema=@table_schema
 
     UNION ALL
-    SELECT table_name, CONCAT('表名：', table_name) AS column_name, '' AS DATA_TYPE, '' AS is_nullable, '' AS COLUMN_COMMENT, -4 AS ORDINAL_POSITION
+    SELECT
+        table_name,
+        CONCAT('表名：', table_name) AS column_name,
+        '' AS DATA_TYPE,
+        '' AS is_nullable,
+        '' AS is_primary_key,
+        '' AS is_auto_increment,
+        '' AS COLUMN_COMMENT,
+        -4 AS ORDINAL_POSITION
     FROM information_schema.tables
     WHERE table_schema=@table_schema
 
     UNION ALL
-    SELECT table_name, CONCAT('用途：', table_comment) AS column_name, '' AS DATA_TYPE, '' AS is_nullable, '' AS COLUMN_COMMENT, -3 AS ORDINAL_POSITION
+    SELECT
+        table_name,
+        CONCAT('用途：', table_comment) AS column_name,
+        '' AS DATA_TYPE,
+        '' AS is_nullable,
+        '' AS is_primary_key,
+        '' AS is_auto_increment,
+        '' AS COLUMN_COMMENT,
+        -3 AS ORDINAL_POSITION
     FROM information_schema.tables
     WHERE table_schema=@table_schema
 
     UNION ALL
-    SELECT t.table_name, CONCAT('索引：', COALESCE(i.index_info, '无')) AS column_name, '' AS DATA_TYPE, '' AS is_nullable, '' AS COLUMN_COMMENT, -2 AS ORDINAL_POSITION
+    SELECT
+        t.table_name,
+        CONCAT('索引：', COALESCE(i.index_info, '无')) AS column_name,
+        '' AS DATA_TYPE,
+        '' AS is_nullable,
+        '' AS is_primary_key,
+        '' AS is_auto_increment,
+        '' AS COLUMN_COMMENT,
+        -2 AS ORDINAL_POSITION
     FROM information_schema.tables t
     LEFT JOIN table_indexes i ON t.table_name = i.table_name
     WHERE t.table_schema=@table_schema
 
     UNION ALL
-    SELECT table_name, '字段名' AS column_name, '字段类型' AS DATA_TYPE, '是否必填' AS is_nullable, '描述' AS COLUMN_COMMENT, -1 AS ORDINAL_POSITION
+    SELECT
+        table_name,
+        '字段名' AS column_name,
+        '字段类型' AS DATA_TYPE,
+        '是否必填' AS is_nullable,
+        '是否主键' AS is_primary_key,
+        '是否自增' AS is_auto_increment,
+        '描述' AS COLUMN_COMMENT,
+        -1 AS ORDINAL_POSITION
     FROM information_schema.tables
     WHERE table_schema=@table_schema
 
@@ -62,6 +101,8 @@ FROM (
             WHEN DATETIME_PRECISION > 0 THEN CONCAT('(', DATETIME_PRECISION, ')')
             ELSE '' END) AS DATA_TYPE,
         CASE IS_NULLABLE WHEN 'NO' THEN '是' ELSE '否' END AS is_nullable,
+        CASE WHEN COLUMN_KEY = 'PRI' THEN '是' ELSE '否' END AS is_primary_key,
+        CASE WHEN EXTRA = 'auto_increment' THEN '是' ELSE '否' END AS is_auto_increment,
         COLUMN_COMMENT,
         ORDINAL_POSITION
     FROM information_schema.columns
