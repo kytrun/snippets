@@ -10,7 +10,7 @@
 setlocal enabledelayedexpansion
 
 :LOOP
-set rootDir=D:\jianguoyun\webclip
+set rootDir=D:\收藏夹\obsidian notes
 
 cd /d %rootDir%
 echo 当前目录的子目录如下：
