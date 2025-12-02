@@ -30,6 +30,7 @@ public class ValidationConverter {
   public static void main(String[] args) {
     // 修改为你的项目基础包名
     new ValidationConverter().scanAndConvert("com.xzzh.smartcloud.employee.card");
+    System.exit(0);
   }
 
   private static final Map<Class<?>, String> ANNOTATION_TYPE_MAPPING = new HashMap<>();
