@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# git-exclude - 创建/覆盖项目本地 exclude 文件
+# git-exclude - 创建/覆盖项目本地 exclude 文件，将此脚本置于 PATH，使用命令"git exclude"
 
 # 定义要写入的内容
 EXCLUDE_CONTENT="**.run.xml
