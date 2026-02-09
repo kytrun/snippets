@@ -1,0 +1,28 @@
+#!/bin/sh
+
+# git-exclude - 创建/覆盖项目本地 exclude 文件
+
+# 定义要写入的内容
+EXCLUDE_CONTENT="**.run.xml
+**/**/**TEST**SERVICE.java"
+
+# 检查是否在 Git 仓库中
+if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
+  echo "错误：当前目录不是 Git 工作树" >&2
+  exit 1
+fi
+
+# 确定 .git/info 目录路径
+GIT_INFO_DIR="$(git rev-parse --git-path info)"
+
+# 确保目录存在
+mkdir -p "$GIT_INFO_DIR"
+
+# 写入 exclude 文件
+echo "$EXCLUDE_CONTENT" >> "$GIT_INFO_DIR/exclude"
+
+# 输出结果
+echo "已更新 $GIT_INFO_DIR/exclude 文件，内容如下："
+echo "----------------------------------------"
+cat "$GIT_INFO_DIR/exclude"
+echo "----------------------------------------"
