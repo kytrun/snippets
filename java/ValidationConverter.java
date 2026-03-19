@@ -12,6 +12,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RestController;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.nodes.Tag;
+import org.yaml.snakeyaml.representer.Representer;
 
 /**
  * 暂不支持 param-rules 配置校验方法参数本身
@@ -29,11 +31,11 @@ public class ValidationConverter {
    */
   public static void main(String[] args) {
     // 修改为你的项目基础包名
-    new ValidationConverter().scanAndConvert("com.xzzh.smartcloud.employee.card");
+    new ValidationConverter().scanAndConvert("com.xzzh.smartcloud.service.hub");
     System.exit(0);
   }
 
-  private static final Map<Class<?>, String> ANNOTATION_TYPE_MAPPING = new HashMap<>();
+  private static final Map<Class<?>, String> ANNOTATION_TYPE_MAPPING = new LinkedHashMap<>();
 
   static {
     ANNOTATION_TYPE_MAPPING.put(NotNull.class, "notNull");
@@ -46,8 +48,9 @@ public class ValidationConverter {
     ANNOTATION_TYPE_MAPPING.put(Length.class, "maxLength");
   }
 
+  // 使用 TreeMap 保证最终输出的 Key 是有序的
   private final Map<String, Map<String, Map<String, Map<String, Map<String, List<Rule>>>>>>
-      validationRuleMap = new HashMap<>();
+      validationRuleMap = new TreeMap<>();
 
   public void scanAndConvert(String basePackage) {
     try {
@@ -67,7 +70,8 @@ public class ValidationConverter {
   }
 
   private Set<Class<?>> findControllers(String basePackage) throws Exception {
-    Set<Class<?>> controllers = new HashSet<>();
+    // 使用 TreeSet 对类进行排序
+    Set<Class<?>> controllers = new TreeSet<>(Comparator.comparing(Class::getName));
     String baseDir = basePackage.replace('.', '/');
     String classpath =
         Objects.requireNonNull(ValidationConverter.class.getClassLoader().getResource(baseDir))
@@ -95,12 +99,19 @@ public class ValidationConverter {
   }
 
   private void processController(Class<?> controllerClass) {
-    for (Method method : controllerClass.getDeclaredMethods()) {
+    Method[] methods = controllerClass.getDeclaredMethods();
+    // 对方法进行排序，确保每次生成顺序一致
+    Arrays.sort(methods, Comparator.comparing(Method::getName));
+
+    for (Method method : methods) {
+      // 忽略编译器生成的合成方法（如 Lambda 表达式生成的方法）和桥接方法
+      if (method.isSynthetic() || method.isBridge()) {
+        continue;
+      }
+
       if (method.getParameterCount() > 0) {
         String methodIdentifier = controllerClass.getSimpleName() + "-" + method.getName();
-        if (!method.getName().contains("lambda")) {
-          processMethod(method, methodIdentifier);
-        }
+        processMethod(method, methodIdentifier);
       }
     }
   }
@@ -265,24 +276,19 @@ public class ValidationConverter {
     rule.setType(type);
 
     try {
-      if (annotation instanceof Size) {
-        Size size = (Size) annotation;
+      if (annotation instanceof Size size) {
         rule.setValue(String.valueOf(size.max()));
         rule.setMessage(size.message());
-      } else if (annotation instanceof Pattern) {
-        Pattern pattern = (Pattern) annotation;
+      } else if (annotation instanceof Pattern pattern) {
         rule.setValue(pattern.regexp());
         rule.setMessage(pattern.message());
-      } else if (annotation instanceof Max) {
-        Max max = (Max) annotation;
+      } else if (annotation instanceof Max max) {
         rule.setValue(String.valueOf(max.value()));
         rule.setMessage(max.message());
-      } else if (annotation instanceof Min) {
-        Min min = (Min) annotation;
+      } else if (annotation instanceof Min min) {
         rule.setValue(String.valueOf(min.value()));
         rule.setMessage(min.message());
-      } else if (annotation instanceof Length) {
-        Length length = (Length) annotation;
+      } else if (annotation instanceof Length length) {
         rule.setValue(String.valueOf(length.max()));
         rule.setMessage(length.message());
       } else {
@@ -298,19 +304,33 @@ public class ValidationConverter {
   }
 
   private void addRule(String methodIdentifier, String paramName, String fieldPath, Rule rule) {
-    validationRuleMap
-        .computeIfAbsent(methodIdentifier, k -> new HashMap<>())
-        .computeIfAbsent("methodRuleMap", k -> new HashMap<>())
-        .computeIfAbsent(paramName, k -> new HashMap<>())
-        .computeIfAbsent("field-rules-map", k -> new HashMap<>())
-        .computeIfAbsent(fieldPath, k -> new ArrayList<>())
-        .add(rule);
+    List<Rule> rules =
+        validationRuleMap
+            .computeIfAbsent(methodIdentifier, k -> new TreeMap<>())
+            .computeIfAbsent("methodRuleMap", k -> new TreeMap<>())
+            .computeIfAbsent(paramName, k -> new TreeMap<>())
+            .computeIfAbsent("field-rules-map", k -> new TreeMap<>())
+            .computeIfAbsent(fieldPath, k -> new ArrayList<>());
+
+    rules.add(rule);
+
+    // 对规则列表进行排序，确保同一字段上的多个规则顺序一致（例如 notNull 在前，maxSize 在后）
+    rules.sort(Comparator.comparing(r -> (String) r.get("type")));
+  }
+
+  private static class FlowStyleRepresenter extends Representer {
+    public FlowStyleRepresenter(DumperOptions options) {
+      super(options);
+      this.representers.put(
+          Rule.class, data -> representMapping(Tag.MAP, (Rule) data, DumperOptions.FlowStyle.FLOW));
+    }
   }
 
   private void generateYamlConfig() {
-    Map<String, Object> config = new HashMap<>();
-    Map<String, Object> validationConfig = new HashMap<>();
-    Map<String, Object> ruleConfig = new HashMap<>();
+    // 使用 LinkedHashMap 保持顶层结构的插入顺序
+    Map<String, Object> config = new LinkedHashMap<>();
+    Map<String, Object> validationConfig = new LinkedHashMap<>();
+    Map<String, Object> ruleConfig = new LinkedHashMap<>();
 
     ruleConfig.put("enabled", true);
     ruleConfig.put("validationRuleMap", validationRuleMap);
@@ -319,12 +339,15 @@ public class ValidationConverter {
 
     DumperOptions options = new DumperOptions();
     options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-    options.setPrettyFlow(true);
+    options.setIndent(2);
+    // 关键设置：设置超大的行宽，强制单行输出
+    options.setWidth(Integer.MAX_VALUE);
 
-    Yaml yaml = new Yaml(options);
-    try (FileWriter writer = new FileWriter("src/main/resources/rule.yaml")) {
+    Yaml yaml = new Yaml(new FlowStyleRepresenter(options), options);
+
+    try (FileWriter writer = new FileWriter("src/main/resources/rules.yaml")) {
       yaml.dump(config, writer);
-      System.out.println("验证配置已生成到: src/main/resources/rule.yaml");
+      System.out.println("验证配置已生成到: src/main/resources/rules.yaml");
     } catch (IOException e) {
       e.printStackTrace();
     }
