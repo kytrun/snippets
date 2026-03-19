@@ -7,6 +7,7 @@
 :: 用户可以输入“exit”退出脚本。
 
 @echo off
+chcp 65001
 setlocal enabledelayedexpansion
 
 :LOOP
