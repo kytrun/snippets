@@ -17,6 +17,9 @@ filename="${filename%.*}"
 assets_dir="${dirname}/${filename}.assets"
 mkdir -p "$assets_dir"
 
+# 进入源文件所在目录
+cd "$dirname" || exit 1
+
 # 匹配 Markdown 文件中的图片链接，并下载图片
 image_urls=$(grep -oE '!\[.*\]\((http|https)://[^)]+\)' "$filepath" | sed -E 's/^!\[.*\]\((http|https):\/\/([^)]+)\)$/\1:\/\/\2/g')
 
