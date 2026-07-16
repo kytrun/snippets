@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# compress — compress files or directories
+# Usage: compress <target> [format]
+# Formats: gz (default), bz2, xz, zip, zst
+set -euo pipefail
+
+TARGET="${1:-}"
+FORMAT="${2:-gz}"
+if [[ -z "$TARGET" ]]; then
+    echo "Usage: compress <file-or-dir> [gz|bz2|xz|zip|zst]" >&2
+    exit 1
+fi
+if [[ ! -e "$TARGET" ]]; then
+    echo "compress: '$TARGET' not found" >&2
+    exit 1
+fi
+# Strip trailing slash
+TARGET="${TARGET%/}"
+NAME=$(basename "$TARGET")
+STAMP=$(date +"%Y%m%d_%H%M%S")
+case "$FORMAT" in
+    gz)
+        OUTPUT="${NAME}_${STAMP}.tar.gz"
+        tar czf "$OUTPUT" "$TARGET"
+        ;;
+    bz2)
+        OUTPUT="${NAME}_${STAMP}.tar.bz2"
+        tar cjf "$OUTPUT" "$TARGET"
+        ;;
+    xz)
+        OUTPUT="${NAME}_${STAMP}.tar.xz"
+        tar cJf "$OUTPUT" "$TARGET"
+        ;;
+    zst)
+        OUTPUT="${NAME}_${STAMP}.tar.zst"
+        tar --zstd -cf "$OUTPUT" "$TARGET"
+        ;;
+    zip)
+        OUTPUT="${NAME}_${STAMP}.zip"
+        zip -r "$OUTPUT" "$TARGET"
+        ;;
+    *)
+        echo "compress: unknown format '$FORMAT'. Use: gz bz2 xz zst zip" >&2
+        exit 1
+        ;;
+esac
+SIZE=$(du -sh "$OUTPUT" | cut -f1)
+echo "  Created: $OUTPUT ($SIZE)"
