@@ -4,7 +4,9 @@
 
 # 定义要写入的内容
 EXCLUDE_CONTENT="**.run.xml
-**/**/**TEST**SERVICE.java"
+**/**/**TEST**SERVICE.java
+**/**/docs/ai/**
+**/**/docs/deprecated/**"
 
 # 检查是否在 Git 仓库中
 if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
